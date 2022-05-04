@@ -46,7 +46,8 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { Timer } from '@element-plus/icons-vue';
+import { preFetch } from 'quasar/wrappers';
+import { defineStore } from 'pinia';
 
 interface User {
   date: string;
@@ -54,41 +55,62 @@ interface User {
   address: string;
 }
 
-export default defineComponent({
-  name: 'IndexPage',
-  components: {
-    Timer,
-  },
-  setup() {
-    const handleEdit = (index: number, row: User) => {
+interface UserState {
+  tableData: User[];
+}
+
+const useUserStore = defineStore('index-page', {
+  state: () =>
+    ({
+      tableData: [],
+    } as UserState),
+  actions: {
+    handleEdit(index: number, row: User) {
       console.log(index, row);
-    };
-    const handleDelete = (index: number, row: User) => {
+    },
+    handleDelete(index: number, row: User) {
       console.log(index, row);
-    };
-    const tableData: User[] = [
-      {
-        date: '2016-05-03',
-        name: 'Tom',
-        address: 'No. 189, Grove St, Los Angeles',
-      },
-      {
-        date: '2016-05-02',
-        name: 'Tom',
-        address: 'No. 189, Grove St, Los Angeles',
-      },
-      {
-        date: '2016-05-04',
-        name: 'Tom',
-        address: 'No. 189, Grove St, Los Angeles',
-      },
-      {
-        date: '2016-05-01',
-        name: 'Tom',
-        address: 'No. 189, Grove St, Los Angeles',
-      },
-    ];
-    return { handleEdit, handleDelete, tableData };
+    },
+    async load() {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      this.tableData = [
+        {
+          date: '2016-05-03',
+          name: 'Tom',
+          address: 'No. 189, Grove St, Los Angeles',
+        },
+        {
+          date: '2016-05-02',
+          name: 'Tom',
+          address: 'No. 189, Grove St, Los Angeles',
+        },
+        {
+          date: '2016-05-04',
+          name: 'Tom',
+          address: 'No. 189, Grove St, Los Angeles',
+        },
+        {
+          date: '2016-05-01',
+          name: 'Tom',
+          address: 'No. 189, Grove St, Los Angeles',
+        },
+      ];
+    },
   },
 });
+
+export default defineComponent({
+  preFetch: preFetch(async ({ store }) => {
+    const userStore = useUserStore(store);
+    await userStore.load();
+  }),
+});
+</script>
+<script lang="ts" setup>
+import { Timer } from '@element-plus/icons-vue';
+import { storeToRefs } from 'pinia';
+
+const userStore = useUserStore();
+const { tableData } = storeToRefs(userStore);
+const { handleEdit, handleDelete } = userStore;
 </script>
